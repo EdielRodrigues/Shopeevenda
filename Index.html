@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achadinhos Pro 🔥</title>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f0f0f;
+color:white;
+max-width:500px;
+margin:0 auto;
+}
+
+header{
+background:#ff6a00;
+padding:15px;
+text-align:center;
+font-weight:bold;
+border-radius:0 0 15px 15px;
+}
+
+.search{
+padding:10px;
+background:#111;
+}
+
+.search input{
+width:100%;
+padding:10px;
+border-radius:8px;
+border:none;
+}
+
+.categorias{
+display:flex;
+overflow:auto;
+gap:10px;
+padding:10px;
+background:#1a1a1a;
+}
+
+.cat{
+padding:8px 12px;
+background:#222;
+border-radius:20px;
+font-size:12px;
+cursor:pointer;
+}
+
+.container{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+padding:10px;
+}
+
+.card{
+background:#1a1a1a;
+border-radius:12px;
+padding:10px;
+}
+
+.card img{
+width:100%;
+height:120px;
+object-fit:contain;
+}
+
+.title{
+font-size:13px;
+}
+
+.price{
+color:#00ff88;
+font-weight:bold;
+}
+
+.old{
+text-decoration:line-through;
+color:#777;
+font-size:12px;
+}
+
+.btn{
+display:block;
+background:#ff6a00;
+padding:10px;
+text-align:center;
+border-radius:10px;
+color:white;
+text-decoration:none;
+margin-top:8px;
+font-weight:bold;
+width:90%;
+margin-left:auto;
+margin-right:auto;
+}
+
+.alerta{
+text-align:center;
+padding:10px;
+color:#00ff88;
+}
+
+.menu{
+position:fixed;
+bottom:0;
+width:100%;
+max-width:500px;
+background:#000;
+display:flex;
+justify-content:space-around;
+padding:10px 0;
+}
+
+iframe{
+width:100%;
+height:60vh;
+border:none;
+}
+
+.whatsapp{
+position:fixed;
+bottom:70px;
+right:20px;
+background:#25d366;
+padding:15px;
+border-radius:50%;
+color:white;
+text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<header>🔥 ACHADINHOS PRO</header>
+
+<div class="search">
+<input type="text" id="busca" placeholder="Buscar produto...">
+</div>
+
+<div class="categorias">
+<div class="cat" onclick="filtrar('all')">Todos</div>
+<div class="cat" onclick="filtrar('Fone')">Fone</div>
+<div class="cat" onclick="filtrar('Caixa')">Caixa</div>
+<div class="cat" onclick="filtrar('Garrafa')">Garrafa</div>
+<div class="cat" onclick="filtrar('Canecas')">Canecas</div>
+<div class="cat" onclick="filtrar('Belezas')">Belezas</div>
+<div class="cat" onclick="filtrar('Cabides')">Cabides</div>
+<div class="cat" onclick="filtrar('Calçados')">Calçados</div>
+<div class="cat" onclick="filtrar('Roupas')">Roupas</div>
+<div class="cat" onclick="filtrar('Celulares')">Celulares</div>
+<div class="cat" onclick="filtrar('Chinelos')">Chinelos</div>
+<div class="cat" onclick="filtrar('Mangueiras')">Mangueiras</div>
+<div class="cat" onclick="filtrar('Computador')">Computador</div>
+<div class="cat" onclick="filtrar('Ferramentas')">Ferramentas</div>
+<div class="cat" onclick="filtrar('Eletromestico')">Eletromestico</div>
+
+</div>
+
+<div class="alerta">👁️ 15 pessoas vendo agora</div>
+
+<div class="container" id="produtos"></div>
+
+<!-- VITRINE -->
+<iframe src="https://collshp.com/edielrodrigues40854?view=storefront"></iframe>
+
+<a href="https://wa.me/5543988402261" class="whatsapp">💬</a>
+
+<div class="menu">
+<div onclick="window.scrollTo({top:0,behavior:'smooth'})">🏠 Início</div>
+
+<a href="https://collshp.com/edielrodrigues40854?view=storefront" target="_blank" style="color:white;text-decoration:none;">
+🛒 Loja
+</a>
+</div>
+
+<script>
+
+// 🔥 FIREBASE CONFIG (SEU)
+const firebaseConfig = {
+apiKey: "AIzaSyDrtZxbKXk7hjlqBL_BLoZMTBdc5iqBCXo",
+authDomain: "ferramentas-projeto.firebaseapp.com",
+databaseURL: "https://ferramentas-projeto.firebaseio.com/",
+projectId: "ferramentas-projeto",
+storageBucket: "ferramentas-projeto.appspot.com",
+messagingSenderId: "877191590019",
+appId: "1:877191590019:web:app"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let lista = [];
+
+// 🔥 RENDER
+function render(dados){
+let html="";
+dados.forEach(p=>{
+html+=`
+<div class="card">
+<img src="${p.img}">
+<div class="title">${p.nome}</div>
+<div class="old">R$ ${p.old}</div>
+<div class="price">R$ ${p.preco}</div>
+<a href="${p.link}" target="_blank" class="btn">COMPRAR</a>
+</div>
+`;
+});
+document.getElementById("produtos").innerHTML=html;
+}
+
+// 🔥 BUSCAR FIREBASE
+db.ref("produtos").on("value",(snapshot)=>{
+lista = [];
+snapshot.forEach(item=>{
+lista.push(item.val());
+});
+render(lista);
+});
+
+// 🔍 BUSCA
+document.getElementById("busca").addEventListener("input",(e)=>{
+let v=e.target.value.toLowerCase();
+render(lista.filter(p=>p.nome.toLowerCase().includes(v)));
+});
+
+// 📂 FILTRO
+function filtrar(cat){
+if(cat==="all") return render(lista);
+render(lista.filter(p=>p.cat===cat));
+}
+
+// 👁️ FAKE ONLINE
+setInterval(()=>{
+let n=Math.floor(Math.random()*40)+10;
+document.querySelector(".alerta").innerHTML=
+"👁️ "+n+" pessoas vendo agora";
+},3000);
+
+</script>
+
+</body>
+</html>
